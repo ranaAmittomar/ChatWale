@@ -3,10 +3,16 @@ package com.example.chatwale;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.chatwale.databinding.ActivityOtpactivityBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
@@ -20,15 +26,23 @@ public class OTPActivity extends AppCompatActivity {
     ActivityOtpactivityBinding binding; //view binding,to use object without calling (findViewById) func.
     FirebaseAuth auth;
     String verificationID;
+    ProgressDialog dialog;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityOtpactivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        binding.otpView.requestFocus();
         auth = FirebaseAuth.getInstance();
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Sending OTP...");
+        dialog.setCancelable(false);
+        dialog.show();
         String phoneNumber = getIntent().getStringExtra("phoneNumber");
         binding.phoneLabel.setText("Verify "+phoneNumber);
+
 
         PhoneAuthOptions options = PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber(phoneNumber) //the number we want for OTP
@@ -48,7 +62,7 @@ public class OTPActivity extends AppCompatActivity {
                     @Override
                     public void onCodeSent(@NonNull String verifyID, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
                         super.onCodeSent(verifyID, forceResendingToken);
-
+                        dialog.dismiss(); //dialog will dismiss as we get the otp.
                         verificationID = verifyID;
                     }
                 }).build();
@@ -56,7 +70,20 @@ public class OTPActivity extends AppCompatActivity {
         binding.otpView.setOtpCompletionListener(new OnOtpCompletionListener() {
             @Override
             public void onOtpCompleted(String otp) {
+                //below code will automatically enter the otp code in box as soon as user gets it & help user not to put otp by him/her.
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID,otp);
 
+                auth.signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(OTPActivity.this,"Logged In",Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(OTPActivity.this,"Login FAILED",Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+                });
             }
         });
     }

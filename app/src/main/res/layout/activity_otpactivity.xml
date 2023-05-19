@@ -66,11 +66,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:layout_gravity="center"
-                android:inputType="number"
+                android:inputType="phone"
                 android:itemBackground="#EAEBEC"
                 android:hint="123456"
                 android:textAllCaps="true"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 app:OtpHideLineWhenFilled="true"
                 app:OtpItemCount="6"
                 app:OtpItemSpacing="6dp"
@@ -79,13 +79,15 @@
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/submitBTN"
+                android:onClick=""
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/button_rounded"
                 android:backgroundTint="#4CAF50"
                 android:elevation="10dp"
-                android:text="Submit" />
+                android:text="Submit"
+                tools:ignore="OnClick" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
