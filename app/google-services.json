@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "121791195138",
+    "project_id": "chatwale-42349",
+    "storage_bucket": "chatwale-42349.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121791195138:android:8a98414676934c771edf1b",
+        "android_client_info": {
+          "package_name": "com.example.chatwale"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121791195138-lf5hci26v3csk4k6caanqgufr7m5ktu7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8Gh5o_mPLy0ZBvezNoMsBzjnUshvZ4a0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121791195138-lf5hci26v3csk4k6caanqgufr7m5ktu7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
