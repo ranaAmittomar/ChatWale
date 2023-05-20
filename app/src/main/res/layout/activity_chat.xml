@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9f9f9"
+    tools:context=".Activities.ChatActivity">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/sendBTN"
+        android:layout_width="32dp"
+        android:layout_marginEnd="10dp"
+        android:layout_height="32dp"
+        android:src="@drawable/send_btn_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/cardView3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cardView3" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView3"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="30dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="55dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        app:layout_constraintEnd_toStartOf="@+id/sendBTN">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/messageBox"
+                android:layout_width="200dp"
+                android:layout_marginLeft="5dp"
+                android:background="@color/white"
+                android:padding="10dp"
+                android:hint="Type Your Message..."
+                android:layout_height="48dp"
+                android:layout_weight="0.6" />
+
+            <ImageView
+                android:id="@+id/attachChatBTN"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_weight="0.2"
+                app:tint="#999898"
+                android:src="@drawable/attachment" />
+
+            <ImageView
+                android:id="@+id/cameraChatBTN"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_weight="0.2"
+                android:layout_marginRight="5dp"
+                app:tint="#999898"
+                android:src="@drawable/camera_icon" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
