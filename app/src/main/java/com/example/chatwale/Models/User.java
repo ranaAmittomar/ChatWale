@@ -1,4 +1,4 @@
-package com.example.chatwale;
+package com.example.chatwale.Models;
 
 public class User {
 

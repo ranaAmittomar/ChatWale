@@ -1,10 +1,11 @@
-package com.example.chatwale;
+package com.example.chatwale.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ public class OTPActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOtpactivityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        getSupportActionBar().hide();
         binding.otpView.requestFocus();
         auth = FirebaseAuth.getInstance();
         dialog = new ProgressDialog(this);
@@ -77,7 +79,8 @@ public class OTPActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            Toast.makeText(OTPActivity.this,"Logged In",Toast.LENGTH_LONG).show();
+                            startActivity(new Intent(OTPActivity.this,SetUpProfileActivity.class));
+                            finishAffinity(); //this finishes every previous activity..
                         }else{
                             Toast.makeText(OTPActivity.this,"Login FAILED",Toast.LENGTH_LONG).show();
 

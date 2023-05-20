@@ -1,4 +1,4 @@
-package com.example.chatwale;
+package com.example.chatwale.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,15 +7,24 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.chatwale.databinding.ActivityPhoneNumberBinding;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class PhoneNumberActivity extends AppCompatActivity {
 
     ActivityPhoneNumberBinding binding;
+    FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityPhoneNumberBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        getSupportActionBar().hide();
+        auth = FirebaseAuth.getInstance();
+
+        if(auth.getCurrentUser()!=null){ //if user already exist or logged In,then go to MainActivity(Chat Activity)
+            startActivity(new Intent(PhoneNumberActivity.this,MainActivity.class));
+            finish();
+        }
         binding.phoneBox.requestFocus();
         binding.continueBTN.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,8 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.ChatWale" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.ChatWale" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your light theme here. -->
          <item name="colorPrimary">#4CAF50</item>
+        <item name="android:statusBarColor">#4CAF50</item>
+<!--Below is for changing color of text in Action Bar        -->
+        <item name="titleTextColor">@color/black</item>
+
     </style>
 
     <style name="Theme.ChatWale" parent="Base.Theme.ChatWale" />
