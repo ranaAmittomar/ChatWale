@@ -5,8 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.example.chatwale.databinding.ActivityOtpactivityBinding;
@@ -66,6 +69,9 @@ public class OTPActivity extends AppCompatActivity {
                         super.onCodeSent(verifyID, forceResendingToken);
                         dialog.dismiss(); //dialog will dismiss as we get the otp.
                         verificationID = verifyID;
+                        //to forcefully open keyboard.
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
                     }
                 }).build();
         PhoneAuthProvider.verifyPhoneNumber(options); //whatever value we get from above code.

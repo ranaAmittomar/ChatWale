@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ChatWale</string>
+    <string name="send_button_as_image_view">Send Button as Image View</string>
+    <string name="type_your_message">Type Your Message...</string>
+    <string name="attachment_button">Attachment Button</string>
+    <string name="camera_button">Camera Button</string>
+    <string name="amit_rana">Amit Rana</string>
+    <string name="online">Online</string>
 </resources>

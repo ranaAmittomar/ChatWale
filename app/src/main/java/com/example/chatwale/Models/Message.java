@@ -1,9 +1,9 @@
 package com.example.chatwale.Models;
 
 public class Message {
-    private String messageId,message,senderId;
+    private String messageId,message,senderId,imageUrl;
     private long timeStamp;
-    private int feeling;
+    private int feeling=-1;
 
     public Message() {
 
@@ -53,5 +53,13 @@ public class Message {
 
     public void setFeeling(int feeling) {
         this.feeling = feeling;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
