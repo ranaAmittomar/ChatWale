@@ -2,7 +2,7 @@ package com.example.chatwale.Models;
 
 public class User {
 
-    private String uid,name,phoneNumberOfUser,profileImage;
+    private String uid,name,phoneNumberOfUser,profileImage,token;
 
 
     public User(){
@@ -50,5 +50,13 @@ public class User {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

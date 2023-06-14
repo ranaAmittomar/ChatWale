@@ -22,23 +22,21 @@ import com.example.chatwale.Models.User;
 import com.example.chatwale.Models.UserStatus;
 import com.example.chatwale.R;
 import com.example.chatwale.databinding.ActivityMainBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,7 +56,43 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
 
+//FIREBASE CONFIG CODE TO CHANG THE
+//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+//                .setMinimumFetchIntervalInSeconds(0)
+//                .build();
+//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+//
+//        FirebaseRemoteConfig finalMFirebaseRemoteConfig = mFirebaseRemoteConfig;
+//        mFirebaseRemoteConfig.fetchAndActivate().addOnSuccessListener(new OnSuccessListener<Boolean>() {
+//            @Override
+//            public void onSuccess(Boolean aBoolean) {
+//
+//                String toolBarColor = finalMFirebaseRemoteConfig.getString("toolbarColor");
+////                Toast.makeText(MainActivity.this,toolBarColor,Toast.LENGTH_SHORT).show();
+////                getSupportActionBar()
+////                        .setBackgroundDrawable(new ColorDrawable(Color.parseColor(toolBarColor)));
+//
+//            }
+//        });
+
         database = FirebaseDatabase.getInstance();
+
+        FirebaseMessaging.getInstance()
+                .getToken()
+                .addOnSuccessListener(new OnSuccessListener<String>() {
+                    @Override
+                    public void onSuccess(String token) {
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("token", token);
+                        database.getReference()
+                                .child("users")
+                                .child(FirebaseAuth.getInstance().getUid())
+                                .updateChildren(map);
+                    }
+                });
+
         users = new ArrayList<>();
         userStatuses = new ArrayList<>();
 
@@ -101,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //if user not equal to his id,only then add in chat section i.e. if user is of same id wouldn't show in chat.
                     assert user != null;
-                    if(!user.getUid().equals(FirebaseAuth.getInstance().getUid())){ //user shouldn't see himself in chat section..
+                    if (!user.getUid().equals(FirebaseAuth.getInstance().getUid())) { //user shouldn't see himself in chat section..
                         users.add(user);
                     }
                 }
@@ -143,18 +177,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        binding.bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int bottomNavId = item.getItemId();
-                if (bottomNavId == R.id.status) {
-                    Intent intent = new Intent();
-                    intent.setType("image/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(intent, 75);
-                }
-                return false;
+        binding.bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int bottomNavId = item.getItemId();
+            if (bottomNavId == R.id.status) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, 75);
             }
+            return false;
         });
     }
 
@@ -167,40 +198,37 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseStorage storage = FirebaseStorage.getInstance();
                 Date date = new Date();
                 StorageReference reference = storage.getReference().child("status").child(date.getTime() + "");
-                reference.putFile(data.getData()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                reference.putFile(data.getData()).addOnCompleteListener(task -> {
 
-                        if (task.isSuccessful()) {
-                            reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    UserStatus userStatus = new UserStatus();
-                                    userStatus.setName(user.getName());
-                                    userStatus.setProfileImage(user.getProfileImage());
-                                    userStatus.setLastUpdated(date.getTime());
-                                    HashMap<String, Object> obj = new HashMap<>();
-                                    obj.put("name", userStatus.getName());
-                                    obj.put("profileImage", userStatus.getProfileImage());
-                                    obj.put("lastUpdated", userStatus.getLastUpdated());
+                    if (task.isSuccessful()) {
+                        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                UserStatus userStatus = new UserStatus();
+                                userStatus.setName(user.getName());
+                                userStatus.setProfileImage(user.getProfileImage());
+                                userStatus.setLastUpdated(date.getTime());
+                                HashMap<String, Object> obj = new HashMap<>();
+                                obj.put("name", userStatus.getName());
+                                obj.put("profileImage", userStatus.getProfileImage());
+                                obj.put("lastUpdated", userStatus.getLastUpdated());
 
-                                    String imageUrl = uri.toString();
-                                    Status status = new Status(imageUrl, userStatus.getLastUpdated());
+                                String imageUrl = uri.toString();
+                                Status status = new Status(imageUrl, userStatus.getLastUpdated());
 
-                                    database.getReference()
-                                            .child("status")
-                                            .child(FirebaseAuth.getInstance().getUid())
-                                            .updateChildren(obj);
+                                database.getReference()
+                                        .child("status")
+                                        .child(FirebaseAuth.getInstance().getUid())
+                                        .updateChildren(obj);
 
-                                    database.getReference().child("status")
-                                            .child(FirebaseAuth.getInstance().getUid())
-                                            .child("statuses")
-                                            .push()
-                                            .setValue(status);
-                                    dialog.dismiss();
-                                }
-                            });
-                        }
+                                database.getReference().child("status")
+                                        .child(FirebaseAuth.getInstance().getUid())
+                                        .child("statuses")
+                                        .push()
+                                        .setValue(status);
+                                dialog.dismiss();
+                            }
+                        });
                     }
                 });
             }
@@ -211,6 +239,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         String currentID = FirebaseAuth.getInstance().getUid();
+        assert currentID != null;
         database.getReference().child("presence").child(currentID).setValue("Online");
     }
 
@@ -231,14 +260,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         int id = item.getItemId();
-        if(id==R.id.search){
-            Toast.makeText(this,"Search",Toast.LENGTH_SHORT).show();
-        } else if (id==R.id.settings) {
-            Toast.makeText(this,"Settings",Toast.LENGTH_SHORT).show();
-        } else if (id==R.id.group) {
-            startActivity(new Intent(MainActivity.this,GroupChatActivity.class));
-        } else if (id==R.id.invite) {
-            Toast.makeText(this,"Invite",Toast.LENGTH_SHORT).show();
+        if (id == R.id.search) {
+            Toast.makeText(this, "Search", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.settings) {
+            Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.group) {
+            startActivity(new Intent(MainActivity.this, GroupChatActivity.class));
+        } else if (id == R.id.invite) {
+            Toast.makeText(this, "Invite", Toast.LENGTH_SHORT).show();
         }
     /*
 

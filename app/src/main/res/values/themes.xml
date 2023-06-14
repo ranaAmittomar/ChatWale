@@ -10,10 +10,11 @@
     </style>
 
 
+
     <style name="Base.Theme.ChatWale.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="colorPrimary">#FFFFFF</item>
-        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="colorPrimary">#D3D1D1</item>
+        <item name="android:statusBarColor">#D3D1D1</item>
         <item name="textAppearanceTitleMedium">@color/black</item>
         <!--Below is for changing color of text in Action Bar        -->
         <item name="titleTextColor">@color/black</item>
