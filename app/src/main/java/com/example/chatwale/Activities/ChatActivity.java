@@ -1,6 +1,5 @@
 package com.example.chatwale.Activities;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,19 +7,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.chatwale.Adapters.MessagesAdapter;
@@ -69,28 +69,28 @@ public class ChatActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         storage = FirebaseStorage.getInstance();
-        setSupportActionBar(binding.toolbar);
+
         dialog = new ProgressDialog(this);
-        dialog.setMessage("Sending Image...");
+        dialog.setMessage("Uploading image...");
         dialog.setCancelable(false);
 
         messages = new ArrayList<>();
-        adapter = new MessagesAdapter(this, messages, senderRoom, receiverRoom);
-        // binding.recyclerViewChat.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewChat.setAdapter(adapter);
+
 
         String name = getIntent().getStringExtra("name");
         String profile = getIntent().getStringExtra("image");
         String token = getIntent().getStringExtra("token");
 
+        //Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
+
         binding.name.setText(name);
         Glide.with(ChatActivity.this).load(profile)
                 .placeholder(R.drawable.avatar)
-                .into(binding.image);
-        binding.backArrow.setOnClickListener(new View.OnClickListener() {
+                .into(binding.profile);
+
+        binding.imageView2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ChatActivity.this, MainActivity.class));
                 finish();
             }
         });
@@ -101,18 +101,16 @@ public class ChatActivity extends AppCompatActivity {
         database.getReference().child("presence").child(receiverUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (snapshot.exists()) {
+                if(snapshot.exists()) {
                     String status = snapshot.getValue(String.class);
-                    if (!status.isEmpty()) {
-                        if(status.equals("Offline")){
-                            binding.statusTyping.setVisibility(View.GONE);
-                        }else{
-                            binding.statusTyping.setText(status);
-                            binding.statusTyping.setVisibility(View.VISIBLE);
+                    if(!status.isEmpty()) {
+                        if(status.equals("Offline")) {
+                            binding.status.setVisibility(View.GONE);
+                        } else {
+                            binding.status.setText(status);
+                            binding.status.setVisibility(View.VISIBLE);
                         }
-                        }
-
+                    }
                 }
             }
 
@@ -122,23 +120,26 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-
         senderRoom = senderUid + receiverUid;
         receiverRoom = receiverUid + senderUid;
+
+        adapter = new MessagesAdapter(this, messages, senderRoom, receiverRoom);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(adapter);
 
         database.getReference().child("chats")
                 .child(senderRoom)
                 .child("messages")
                 .addValueEventListener(new ValueEventListener() {
-                    @SuppressLint("NotifyDataSetChanged")
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         messages.clear();
-                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                        for(DataSnapshot snapshot1 : snapshot.getChildren()) {
                             Message message = snapshot1.getValue(Message.class);
                             message.setMessageId(snapshot1.getKey());
                             messages.add(message);
                         }
+
                         adapter.notifyDataSetChanged();
                     }
 
@@ -148,10 +149,11 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
 
-        binding.sendBTN.setOnClickListener(new View.OnClickListener() {//SEND SMS BTN.
+        binding.sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String messageTxt = binding.messageBox.getText().toString();
+
                 Date date = new Date();
                 Message message = new Message(messageTxt, senderUid, date.getTime());
                 binding.messageBox.setText("");
@@ -171,31 +173,29 @@ public class ChatActivity extends AppCompatActivity {
                         .child(randomKey)
                         .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
-                            public void onSuccess(Void unused) {
+                            public void onSuccess(Void aVoid) {
                                 database.getReference().child("chats")
                                         .child(receiverRoom)
                                         .child("messages")
                                         .child(randomKey)
                                         .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
-                                            public void onSuccess(Void unused) {
-                                                sendNotification(name,message.getMessage(),token);
+                                            public void onSuccess(Void aVoid) {
+                                                sendNotification(name, message.getMessage(), token);
                                             }
                                         });
-
-
                             }
                         });
+
             }
         });
 
-        binding.attachChatBTN.setOnClickListener(new View.OnClickListener() { //to send attachments..
+        binding.attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //to open gallery(or custom made dialogue box for later work.)
                 Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT); //to get image
-                intent.setType("image/*");//all type of image are selectable. ("video/*")->for videos ("*/*")->for all types of things.
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
                 startActivityForResult(intent, 25);
             }
         });
@@ -204,7 +204,6 @@ public class ChatActivity extends AppCompatActivity {
         binding.messageBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
 
             }
 
@@ -215,78 +214,79 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                database.getReference().child("presence").child(senderUid).setValue("Typing...");
+                database.getReference().child("presence").child(senderUid).setValue("typing...");
                 handler.removeCallbacksAndMessages(null);
-                handler.postDelayed(userStoppedTyping, 1000);
+                handler.postDelayed(userStoppedTyping,1000);
             }
 
             Runnable userStoppedTyping = new Runnable() {
                 @Override
                 public void run() {
                     database.getReference().child("presence").child(senderUid).setValue("Online");
-
                 }
             };
         });
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-//        getSupportActionBar().setTitle(name); -> to display the Title name
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true); //to display back arrow
+
+
+//        getSupportActionBar().setTitle(name);
+//
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    void sendNotification(String name,String message,String token){
-
-
+    void sendNotification(String name, String message, String token) {
         try {
-
             RequestQueue queue = Volley.newRequestQueue(this);
+
             String url = "https://fcm.googleapis.com/fcm/send";
 
             JSONObject data = new JSONObject();
-            data.put("title",name);
-            data.put("body",message);
+            data.put("title", name);
+            data.put("body", message);
             JSONObject notificationData = new JSONObject();
-            notificationData.put("notification",data);
+            notificationData.put("notification", data);
             notificationData.put("to",token);
 
-            JsonObjectRequest request = new JsonObjectRequest(url, notificationData, new Response.Listener<JSONObject>() {
+            JsonObjectRequest request = new JsonObjectRequest(url, notificationData
+                    , new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-//                    Toast.makeText(ChatActivity.this,"succes of JSon Line 255",Toast.LENGTH_SHORT).show();
-
+                    // Toast.makeText(ChatActivity.this, "success", Toast.LENGTH_SHORT).show();
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
-                    Toast.makeText(ChatActivity.this,"Error of JSON Line 262" ,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChatActivity.this, error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }
-            }){
+            }) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    HashMap<String,String> map = new HashMap<>();
-                    String key = "Key=AAAAHFtSKAI:APA91bErOFruaUvXqBDkSWJcEV94-SlnpjfkAfINT8thJe0-qZEinkLVi6vYtj96yW9VcwRKd8UWqk6Cr9xMnLxhYx17ldpc91Z_SAnFmAL3lWESDoTLahqFYpO7MVri6k7GWZ2PbgTP";
-                    map.put("Authorization",key);
-                    map.put("Content-Type","application/json");
-                    return map;
+                    HashMap<String, String> map = new HashMap<>();
+                    String key = "Key=AAAASn2Fs4A:APA91bGdTVxFBP-V0NN_zLjQTUb7yr9Shy0sYcSN2MvHxTksz11FktDxUt44hKD3CyD2ghCX61RGJW25F0mBPpTBrSArmo9emaKP8HqRQGe5A8vrdygKbY-Kfph9YvaeQnPmif5a1Zr7";
+                    map.put("Content-Type", "application/json");
+                    map.put("Authorization", key);
 
+                    return map;
                 }
             };
-        queue.add(request);
+
+            queue.add(request);
+
+
+        } catch (Exception ex) {
 
         }
-        catch (Exception ex){
 
-        }
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 25) {
-            if (data != null) {
-                if (data.getData() != null) {
+
+        if(requestCode == 25) {
+            if(data != null) {
+                if(data.getData() != null) {
                     Uri selectedImage = data.getData();
                     Calendar calendar = Calendar.getInstance();
                     StorageReference reference = storage.getReference().child("chats").child(calendar.getTimeInMillis() + "");
@@ -295,13 +295,14 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             dialog.dismiss();
-                            if (task.isSuccessful()) {
+                            if(task.isSuccessful()) {
                                 reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         String filePath = uri.toString();
 
                                         String messageTxt = binding.messageBox.getText().toString();
+
                                         Date date = new Date();
                                         Message message = new Message(messageTxt, senderUid, date.getTime());
                                         message.setMessage("photo");
@@ -323,21 +324,21 @@ public class ChatActivity extends AppCompatActivity {
                                                 .child(randomKey)
                                                 .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                     @Override
-                                                    public void onSuccess(Void unused) {
+                                                    public void onSuccess(Void aVoid) {
                                                         database.getReference().child("chats")
                                                                 .child(receiverRoom)
                                                                 .child("messages")
                                                                 .child(randomKey)
                                                                 .setValue(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                                     @Override
-                                                                    public void onSuccess(Void unused) {
+                                                                    public void onSuccess(Void aVoid) {
 
                                                                     }
                                                                 });
-
-
                                                     }
                                                 });
+
+                                        //Toast.makeText(ChatActivity.this, filePath, Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             }
@@ -351,15 +352,21 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String currentID = FirebaseAuth.getInstance().getUid();
-        database.getReference().child("presence").child(currentID).setValue("Online");
+        String currentId = FirebaseAuth.getInstance().getUid();
+        database.getReference().child("presence").child(currentId).setValue("Online");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        String currentID = FirebaseAuth.getInstance().getUid();
-        database.getReference().child("presence").child(currentID).setValue("Offline");
+        String currentId = FirebaseAuth.getInstance().getUid();
+        database.getReference().child("presence").child(currentId).setValue("Offline");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

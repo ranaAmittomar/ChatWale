@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 
 public class MessagesAdapter extends RecyclerView.Adapter {
 
+
     Context context;
     ArrayList<Message> messages;
 
@@ -35,7 +37,6 @@ public class MessagesAdapter extends RecyclerView.Adapter {
 
     String senderRoom;
     String receiverRoom;
-
 
     FirebaseRemoteConfig remoteConfig;
 
@@ -147,7 +148,12 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             viewHolder.binding.message.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    popup.onTouch(v, event);
+
+                    boolean isFeelingsEnabled = remoteConfig.getBoolean("isFeelingsEnabled");
+                    if(isFeelingsEnabled)
+                        popup.onTouch(v, event);
+                    else
+                        Toast.makeText(context, "This feature is disabled temporarily.", Toast.LENGTH_SHORT).show();
                     return false;
                 }
             });
@@ -285,16 +291,24 @@ public class MessagesAdapter extends RecyclerView.Adapter {
                         }
                     });
 
-                    binding.delete.setOnClickListener(v1 -> {
-                        FirebaseDatabase.getInstance().getReference()
-                                .child("chats")
-                                .child(senderRoom)
-                                .child("messages")
-                                .child(message.getMessageId()).setValue(null);
-                        dialog.dismiss();
+                    binding.delete.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FirebaseDatabase.getInstance().getReference()
+                                    .child("chats")
+                                    .child(senderRoom)
+                                    .child("messages")
+                                    .child(message.getMessageId()).setValue(null);
+                            dialog.dismiss();
+                        }
                     });
 
-                    binding.cancel.setOnClickListener(v12 -> dialog.dismiss());
+                    binding.cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
 
                     dialog.show();
 
@@ -327,5 +341,4 @@ public class MessagesAdapter extends RecyclerView.Adapter {
             binding = ItemReceiveMsgBinding.bind(itemView);
         }
     }
-
 }

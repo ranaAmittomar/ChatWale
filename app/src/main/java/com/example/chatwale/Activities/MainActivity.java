@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.chatwale.Adapters.TopStatusAdapter;
 import com.example.chatwale.Adapters.UsersAdapter;
 import com.example.chatwale.Models.Status;
@@ -38,7 +37,10 @@ import java.util.HashMap;
 import java.util.Objects;
 
 
+
+
 public class MainActivity extends AppCompatActivity {
+
 
     ActivityMainBinding binding;
     FirebaseDatabase database;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressDialog dialog;
     User user;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,40 +60,58 @@ public class MainActivity extends AppCompatActivity {
 
 
 //FIREBASE CONFIG CODE TO CHANG THE
-//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-//                .setMinimumFetchIntervalInSeconds(0)
-//                .build();
-//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+        /*
+        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(0)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+
+        FirebaseRemoteConfig finalMFirebaseRemoteConfig = mFirebaseRemoteConfig;
+        mFirebaseRemoteConfig.fetchAndActivate().addOnSuccessListener(new OnSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+
+                String toolBarColor = finalMFirebaseRemoteConfig.getString("toolbarColor");
+                String toolbarImage = finalMFirebaseRemoteConfig.getString("toolbarImage");
+                boolean istoolbarImageEnabled = finalMFirebaseRemoteConfig.getBoolean("toolbarImageEnabled");
+//                Toast.makeText(MainActivity.this,toolBarColor,Toast.LENGTH_SHORT).show();
 //
-//        FirebaseRemoteConfig finalMFirebaseRemoteConfig = mFirebaseRemoteConfig;
-//        mFirebaseRemoteConfig.fetchAndActivate().addOnSuccessListener(new OnSuccessListener<Boolean>() {
-//            @Override
-//            public void onSuccess(Boolean aBoolean) {
-//
-//                String toolBarColor = finalMFirebaseRemoteConfig.getString("toolbarColor");
-////                Toast.makeText(MainActivity.this,toolBarColor,Toast.LENGTH_SHORT).show();
-////                getSupportActionBar()
-////                        .setBackgroundDrawable(new ColorDrawable(Color.parseColor(toolBarColor)));
-//
-//            }
-//        });
+                if (istoolbarImageEnabled) {
+                    Glide.with(MainActivity.this)
+                            .load(toolbarImage)
+                            .into(new CustomTarget<Drawable>() {
+                                @Override
+                                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                                    getActionBar().setBackgroundDrawable(resource);
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                }
+                            });
+                }
+                else{
+                    getSupportActionBar()
+                        .setBackgroundDrawable(new ColorDrawable(Color.parseColor(toolBarColor)));
+                }
+
+            }
+        });*/
 
         database = FirebaseDatabase.getInstance();
 
         FirebaseMessaging.getInstance()
                 .getToken()
-                .addOnSuccessListener(new OnSuccessListener<String>() {
-                    @Override
-                    public void onSuccess(String token) {
-                        HashMap<String, Object> map = new HashMap<>();
-                        map.put("token", token);
-                        database.getReference()
-                                .child("users")
-                                .child(FirebaseAuth.getInstance().getUid())
-                                .updateChildren(map);
-                    }
+                .addOnSuccessListener(token -> {
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("token", token);
+                    database.getReference()
+                            .child("users")
+                            .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
+                            .updateChildren(map);
                 });
 
         users = new ArrayList<>();
@@ -218,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 database.getReference()
                                         .child("status")
-                                        .child(FirebaseAuth.getInstance().getUid())
+                                        .child(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                                         .updateChildren(obj);
 
                                 database.getReference().child("status")
@@ -247,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         String currentID = FirebaseAuth.getInstance().getUid();
+        assert currentID != null;
         database.getReference().child("presence").child(currentID).setValue("Offline");
     }
     //    @Override
